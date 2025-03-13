@@ -57,7 +57,7 @@ There is an alpha feature `MemoryQoS` which attempts to add more preemptive
 limit enforcement for memory (as opposed to reactive enforcement by the OOM
 killer). However, this effort is
 [stalled](https://github.com/kubernetes/enhancements/tree/a47155b340/keps/sig-node/2570-memory-qos#latest-update-stalled)
-due to a potential livelock situation a memory hungry can cause.
+due to a potential livelock situation that a memory hungry process can cause.
 {{< /note >}}
 
 {{< note >}}
@@ -115,8 +115,8 @@ resource requests/limits of that type for each container in the Pod.
 
 Starting in Kubernetes 1.32, you can also specify resource requests and limits at
 the Pod level. At the Pod level, Kubernetes {{< skew currentVersion >}}
-only supports resource requests or limits for specific resource types: `cpu` and /
-or `memory`. This feature is currently in alpha and with the feature enabled,
+only supports resource requests or limits for resource types `cpu` and `memory`.
+This feature is currently in alpha and with the feature enabled,
 Kubernetes allows you to declare an overall resource budget for the Pod, which is
 especially helpful when dealing with a large number of containers where it can be
 difficult to accurately gauge individual resource needs. Additionally, it enables
@@ -152,7 +152,7 @@ runs on a single-core, dual-core, or 48-core machine.
 {{< note >}}
 Kubernetes doesn't allow you to specify CPU resources with a precision finer than
 `1m` or `0.001` CPU. To avoid accidentally using an invalid CPU quantity, it's useful to specify CPU units using the milliCPU form 
-instead of the decimal form when using less than 1 CPU unit. 
+instead of the decimal form when using less than 1 CPU unit.
 
 For example, you have a Pod that uses `5m` or `0.005` CPU and would like to decrease
 its CPU resources. By using the decimal form, it's harder to spot that `0.0005` CPU
@@ -309,12 +309,12 @@ when a process uses memory as a work area and when using memory-backed
 there are additional points below that you should be careful of:
 
 * Files stored on a memory-backed volume are almost entirely managed by the
-  user application. Unlike when used as a work area for a process, you can not
+  user application. Unlike when used as a work area for a process, you cannot
   rely on things like language-level garbage collection.
 * The purpose of writing files to a volume is to save data or pass it between
   applications. Neither Kubernetes nor the OS may automatically delete files
-  from a volume, so memory used by those files can not be reclaimed when the
-  system or the pod are under memory pressure.
+  from a volume, so memory used by those files cannot be reclaimed when the
+  system or the Pod are under memory pressure.
 * A memory-backed `emptyDir` is useful because of its performance, but memory
   is generally much smaller in size and much higher in cost than other storage
   media, such as disks or SSDs. Using large amounts of memory for `emptyDir`
@@ -338,10 +338,10 @@ As an alternative, a cluster administrator can enforce size limits for
 {{< feature-state for_k8s_version="v1.25" state="stable" >}}
 
 Nodes have local ephemeral storage, backed by
-locally-attached writeable devices or, sometimes, by RAM.
+locally attached writeable devices or sometimes by RAM.
 "Ephemeral" means that there is no long-term guarantee about durability.
 
-Pods use ephemeral local storage for scratch space, caching, and for logs.
+Pods use local ephemeral storage for scratch space, caching, and logs.
 The kubelet can provide scratch space to Pods using local ephemeral storage to
 mount [`emptyDir`](/docs/concepts/storage/volumes/#emptydir)
  {{< glossary_tooltip term_id="volume" text="volumes" >}} into containers.
@@ -358,22 +358,22 @@ from local ephemeral storage.
 
 
 {{< note >}}
-To make the resource quota work on ephemeral-storage, two things need to be done:
+To make the resource quota work on ephemeral storage, two things need to be done:
 
-* An admin sets the resource quota for ephemeral-storage in a namespace.
-* A user needs to specify limits for the ephemeral-storage resource in the Pod spec.
+* An admin sets the resource quota for `ephemeral-storage` in a namespace.
+* A user needs to specify limits for the `ephemeral-storage` resource in the Pod spec.
 
-If the user doesn't specify the ephemeral-storage resource limit in the Pod spec,
-the resource quota is not enforced on ephemeral-storage.
+If the user doesn't specify the `ephemeral-storage` resource limit in the Pod spec,
+the resource quota is not enforced on ephemeral storage.
 
 {{< /note >}}
 
-Kubernetes lets you track, reserve and limit the amount
-of ephemeral local storage a Pod can consume.
+Kubernetes lets you track, reserve, and limit the amount
+of local ephemeral storage a Pod can consume.
 
 ### Configurations for local ephemeral storage
 
-Kubernetes supports two ways to configure local ephemeral storage on a node:
+Kubernetes supports two ways to configure local ephemeral storage on a Node:
 {{< tabs name="local_storage_configurations" >}}
 {{% tab name="Single filesystem" %}}
 In this configuration, you place all different kinds of ephemeral local data
@@ -383,7 +383,7 @@ to Kubernetes (kubelet) data.
 
 The kubelet also writes
 [node-level container logs](/docs/concepts/cluster-administration/logging/#logging-at-the-node-level)
-and treats these similarly to ephemeral local storage.
+and treats these similarly to local ephemeral storage.
 
 The kubelet writes logs to files inside its configured log directory (`/var/log`
 by default); and has a base directory for other locally stored data
@@ -421,7 +421,7 @@ that you have set up the node using one of the supported configurations for loca
 ephemeral storage.
 
 If you have a different configuration, then the kubelet does not apply resource
-limits for ephemeral local storage.
+limits for local ephemeral storage.
 
 {{< note >}}
 The kubelet tracks `tmpfs` emptyDir volumes as container memory use, rather
